@@ -92,6 +92,13 @@ $CONTAINER_RT run -d --name itk-service \
   -p 8000:8000 \
   itk_service
 
+# The launcher checks out peers into /root/.cache/a2a-itk (bind-mounted
+# from the host in the shadow workflow), which are host-owned; git in
+# the container runs as root and refuses to touch differently-owned
+# repos ("dubious ownership") — trust every path so uv-dynamic-versioning
+# and friends can run `git describe` on the checked-out peer trees.
+$CONTAINER_RT exec itk-service git config --system --add safe.directory '*'
+
 # 4. Verify service is up and send post request
 MAX_RETRIES=30
 echo "Waiting for ITK service to start on 127.0.0.1:8000..."
